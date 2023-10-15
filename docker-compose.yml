@@ -1,0 +1,45 @@
+version: '3.0.0'
+services:
+    api:
+        build: 
+            dockerfile: Dockerfile
+            context: .
+            target: development
+        container_name: my_nest_app
+        volumes:
+            - ./src:/usr/src/app/src
+            - app_logs:/usr/src/app/logs
+        env_file:
+            - .env
+        environment:
+            DATABASE_URL: ${DATABASE_URL}
+            NODE_ENV: development
+            PORT: ${PORT}
+        ports:
+            - "${PORT}:${PORT}"
+        networks:
+            - my_network
+        restart: always
+
+    rabbitmq:
+        image: "rabbitmq:3-management"
+        container_name: my_rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            RABBITMQ_DEFAULT_USER: your_rabbitmq_user
+            RABBITMQ_DEFAULT_PASS: your_rabbitmq_password
+        networks:
+            - my_network
+volumes:
+    app_logs:
+networks:
+    my_network:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: ${SUBNET}
+                  gateway: ${GATEWAY}
+                  ip_range: ${IP_RANGE}
