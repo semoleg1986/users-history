@@ -39,7 +39,8 @@ export class UsersService {
       updatedAt: new Date(),
       password: hashedPassword,
     };
-    return await this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+    return savedUser;
   }
 
   async findAll() {

@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Put,
   ParseUUIDPipe,
+  Inject,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,11 +27,15 @@ import {
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { plainToClass, plainToInstance } from 'class-transformer';
+import { ClientProxy } from '@nestjs/microservices';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject('SERVICE') private client: ClientProxy,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -40,8 +45,10 @@ export class UsersController {
     description: 'Bad request. body does not contain required fields',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  create(@Body() createUserDto: CreateUserDto) {
-    return plainToClass(User, this.usersService.create(createUserDto));
+  async create(@Body() createUserDto: CreateUserDto) {
+    const newUser = await this.usersService.create(createUserDto);
+    this.client.emit('create', { id: newUser.id });
+    return plainToClass(User, newUser);
   }
 
   @Get()
@@ -86,6 +93,7 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    this.client.emit<any>('update', id);
     return plainToClass(User, this.usersService.update(id, updateUserDto));
   }
 
@@ -99,6 +107,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'User not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
+    this.client.emit<any>('delete', id);
     return this.usersService.remove(id);
   }
 }
