@@ -14,10 +14,10 @@ import { Transport } from '@nestjs/microservices';
         name: 'SERVICE',
         transport: Transport.RMQ,
         options: {
-          // urls: [
-          //   'amqps://vxmfehla:lwSmdKVZ4T4uX7gxRNk-WTkpyW6KWnyY@crow.rmq.cloudamqp.com/vxmfehla',
-          // ],
-          urls: ['amqp://admin:admin@my_rabbitmq:5672'],
+          urls: [
+            'amqps://vxmfehla:lwSmdKVZ4T4uX7gxRNk-WTkpyW6KWnyY@crow.rmq.cloudamqp.com/vxmfehla',
+          ],
+          // urls: ['amqp://admin:admin@my_rabbitmq:5672'],
           queue: 'main-queue',
           noAck: true,
           queueOptions: {
